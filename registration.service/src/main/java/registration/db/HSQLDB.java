@@ -1,15 +1,19 @@
 package registration.db;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Properties;
 
 public class HSQLDB {
 
 	Connection connection;
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		HSQLDB test = new HSQLDB();
 		if (!test.loadDriver())
 			return;
@@ -32,17 +36,20 @@ public class HSQLDB {
 		return true;
 	}
 
-	private boolean getConnection() {
+	private boolean getConnection() throws IOException {
 
 		try {
-			String path = "javatasks/";
-			String dbname = "registration.service";
-			String connectionString = "jdbc:hsqldb:file:" + path + dbname;
-			String login = "joe";
-			String password = "password";
-			connection = DriverManager.getConnection(connectionString, login, password);
+			Properties p = new Properties();
+			String pFile = "config.properties";
+			InputStream inputStream = getClass().getClassLoader().getResourceAsStream(pFile);
+			if (inputStream != null)
+				p.load(inputStream);
+			else
+				throw new FileNotFoundException("property file '" + pFile + "' not found in the classpath");
+			connection = DriverManager.getConnection(p.getProperty("connectionString"), p.getProperty("user"),
+					p.getProperty("password"));
 		} catch (SQLException e) {
-			System.out.println("Соединение не создано");
+			System.out.println("Connection wasn't created");
 			e.printStackTrace();
 			return false;
 		}
@@ -79,9 +86,9 @@ public class HSQLDB {
 	}
 
 	private void closeConnection() {
-
 		try {
-			connection.createStatement().execute("SHUTDOWN");
+			connection.createStatement().execute("DROP SCHEMA PUBLIC CASCADE");
+			connection.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

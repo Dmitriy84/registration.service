@@ -29,7 +29,7 @@ public class HSQLDB {
 		try {
 			Class.forName("org.hsqldb.jdbcDriver");
 		} catch (ClassNotFoundException e) {
-			System.out.println("Драйвер не найден");
+			System.out.println("Driver wasn't found");
 			e.printStackTrace();
 			return false;
 		}

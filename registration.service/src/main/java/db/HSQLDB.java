@@ -1,4 +1,4 @@
-package registration.db;
+package db;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
+
+import model.User;
 
 public class HSQLDB {
 
@@ -17,14 +19,14 @@ public class HSQLDB {
 		test.loadDriver();
 		test.getConnection();
 		test.createTable();
-		test.fillTable("my_mail2@gmail.com", "katie44", false);
+		test.fillTable(new User("my_mail2@gmail.com", "katie44", false));
 		test.printTable();
 		test.closeConnection();
 	}
 
 	private void loadDriver() throws Exception {
 		try {
-			Class.forName("org.hsqldb.jdbcDriver2");
+			Class.forName("org.hsqldb.jdbcDriver");
 		} catch (ClassNotFoundException e) {
 			throw new Exception("Driver wasn't found", e);
 		}
@@ -51,9 +53,9 @@ public class HSQLDB {
 				.executeUpdate("CREATE TABLE Users (email VARCHAR(255), password VARCHAR(255), is_confirmed BOOLEAN)");
 	}
 
-	private void fillTable(String email, String password, boolean confirmed) throws SQLException {
-		connection.createStatement()
-				.executeUpdate(String.format("INSERT INTO Users VALUES('%s', '%s', '%s')", email, password, confirmed));
+	private void fillTable(User user) throws SQLException {
+		connection.createStatement().executeUpdate(String.format("INSERT INTO Users VALUES('%s', '%s', '%s')",
+				user.getEmail(), user.getPassword(), user.isConfirmed()));
 	}
 
 	private void printTable() throws SQLException {

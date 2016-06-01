@@ -46,8 +46,7 @@ public class HSQLDB {
 				p.load(inputStream);
 			else
 				throw new FileNotFoundException("property file '" + pFile + "' not found in the classpath");
-			connection = DriverManager.getConnection(p.getProperty("connectionString"), p.getProperty("user"),
-					p.getProperty("password"));
+			connection = DriverManager.getConnection(p.getProperty("connectionString"));
 		} catch (SQLException e) {
 			System.out.println("Connection wasn't created");
 			e.printStackTrace();

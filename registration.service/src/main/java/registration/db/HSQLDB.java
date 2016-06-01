@@ -1,7 +1,6 @@
 package registration.db;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,30 +12,25 @@ public class HSQLDB {
 
 	Connection connection;
 
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws Exception {
 		HSQLDB test = new HSQLDB();
-		if (!test.loadDriver())
-			return;
-		if (!test.getConnection())
-			return;
+		test.loadDriver();
+		test.getConnection();
 		test.createTable();
 		test.fillTable("my_mail2@gmail.com", "katie44", false);
 		test.printTable();
 		test.closeConnection();
 	}
 
-	private boolean loadDriver() {
+	private void loadDriver() throws Exception {
 		try {
-			Class.forName("org.hsqldb.jdbcDriver");
+			Class.forName("org.hsqldb.jdbcDriver2");
 		} catch (ClassNotFoundException e) {
-			System.out.println("Driver wasn't found");
-			e.printStackTrace();
-			return false;
+			throw new Exception("Driver wasn't found", e);
 		}
-		return true;
 	}
 
-	private boolean getConnection() throws IOException {
+	private void getConnection() throws Exception {
 
 		try {
 			Properties p = new Properties();
@@ -48,48 +42,29 @@ public class HSQLDB {
 				throw new FileNotFoundException("property file '" + pFile + "' not found in the classpath");
 			connection = DriverManager.getConnection(p.getProperty("connectionString"));
 		} catch (SQLException e) {
-			System.out.println("Connection wasn't created");
-			e.printStackTrace();
-			return false;
-		}
-		return true;
-	}
-
-	private void createTable() {
-		try {
-			connection.createStatement().executeUpdate(
-					"CREATE TABLE Users (email VARCHAR(255), password VARCHAR(255), is_confirmed BOOLEAN)");
-		} catch (SQLException e) {
-			e.printStackTrace();
+			throw new Exception("Connection wasn't created", e);
 		}
 	}
 
-	private void fillTable(String email, String password, boolean confirmed) {
-		try {
-			connection.createStatement().executeUpdate(
-					String.format("INSERT INTO Users VALUES('%s', '%s', '%s')", email, password, confirmed));
-		} catch (SQLException e) {
-			e.printStackTrace();
+	private void createTable() throws SQLException {
+		connection.createStatement()
+				.executeUpdate("CREATE TABLE Users (email VARCHAR(255), password VARCHAR(255), is_confirmed BOOLEAN)");
+	}
+
+	private void fillTable(String email, String password, boolean confirmed) throws SQLException {
+		connection.createStatement()
+				.executeUpdate(String.format("INSERT INTO Users VALUES('%s', '%s', '%s')", email, password, confirmed));
+	}
+
+	private void printTable() throws SQLException {
+		ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM Users");
+		while (rs.next()) {
+			System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getBoolean(3));
 		}
 	}
 
-	private void printTable() {
-		try {
-			ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM Users");
-			while (rs.next()) {
-				System.out.println(rs.getString(1) + " " + rs.getString(2) + " " + rs.getBoolean(3));
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void closeConnection() {
-		try {
-			connection.createStatement().execute("DROP SCHEMA PUBLIC CASCADE");
-			connection.close();
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	private void closeConnection() throws SQLException {
+		connection.createStatement().execute("DROP SCHEMA PUBLIC CASCADE");
+		connection.close();
 	}
 }

@@ -14,6 +14,11 @@
 			<artifactId>hsqldb</artifactId>
 			<version>2.3.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-broker</artifactId>
+			<version>5.13.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
